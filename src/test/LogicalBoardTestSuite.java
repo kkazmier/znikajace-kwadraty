@@ -9,7 +9,7 @@ public class LogicalBoardTestSuite {
     @Test
     public void testTwoSquaresHaveTheSameColor(){
         //Given
-        LogicalBoard logicalBoard = new LogicalBoard(5, 5);
+        LogicalBoard logicalBoard = new LogicalBoard(5, 5, 3);
 
         //When
         logicalBoard.setSquareColor(1, "RED");

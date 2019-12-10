@@ -5,58 +5,40 @@ import java.util.*;
 public class LogicalBoard {
     private int width;
     private int height;
+    private int colorsQuantity;
+    private double filledPercentage;
     private List<LogicalSquare> squares;
 
-    public LogicalBoard(int width, int height) {
-        squares = new ArrayList<>();
-        squares.add(new LogicalSquare(0));
+    public LogicalBoard(int width, int height, int colorsQuantity) {
+        filledPercentage = 100;
         this.width = width;
         this.height = height;
+        this.colorsQuantity = colorsQuantity;
+        squares = new ArrayList<>();
+        squares.add(new LogicalSquare(0));
         for (int i=1; i<=width*height; i++) {
             squares.add(new LogicalSquare(i));
         }
     }
 
     //Getters
-
     String getSquareColor(int id){
         return squares.get(id).getColor();
     }
 
-    String getSquareColor(int posX, int posY){
-        return squares.get((posY-1)*width + (posX - 1)).getColor();
-    }
-
     //Setters
-
     public void setSquareColor(int id, String color){
         squares.get(id).setColor(color);
     }
 
-    public void setSquareColor(int posX, int posY, String color){
-        squares.get((posY-1)*width + (posX - 1)).setColor(color);
-    }
-
-    public void setDefaultColors(){
-        setSquareColor(1, "RED");
-        setSquareColor(2, "RED");
-        setSquareColor(3, "GREEN");
-        setSquareColor(7, "GREEN");
-        setSquareColor(8, "GREEN");
-        setSquareColor(9, "GREEN");
-        setSquareColor(12, "GREEN");
-        setSquareColor(13, "GREEN");
-        setSquareColor(14, "GREEN");
-        setSquareColor(17, "GREEN");
-        setSquareColor(18, "GREEN");
-        setSquareColor(23, "GREEN");
-        setSquareColor(25, "BLUE");
-    }
+    public void setAllSquaresBlack(){
+        squares.stream()
+                .forEach(s->s.setColor("BLACK"));    }
 
     public void setRandomColors(){
         Random gen = new Random();
         for (int i=1; i<=width*height; i++){
-            switch (gen.nextInt(3)){
+            switch (gen.nextInt(colorsQuantity)){
                 case 0: {
                     setSquareColor(i, "RED");
                     break;
@@ -69,6 +51,22 @@ public class LogicalBoard {
                     setSquareColor(i, "BLUE");
                     break;
                 }
+                case 3: {
+                    setSquareColor(i, "YELLOW");
+                    break;
+                }
+                case 4: {
+                    setSquareColor(i, "BROWN");
+                    break;
+                }
+                case 5: {
+                    setSquareColor(i, "GRAY");
+                    break;
+                }
+                case 6: {
+                    setSquareColor(i, "ORANGE");
+                    break;
+                }
                 default:{
                     setSquareColor(i, "WHITE");
                     break;
@@ -77,12 +75,11 @@ public class LogicalBoard {
         }
     }
 
-    //Other function
-
-    public boolean twoSquaresHaveTheSameColor(LogicalSquare s1, LogicalSquare s2){
-        return s1.getColor().equals(s2.getColor());
+    public void setColorsQuantity(int colorsQuantity) {
+        this.colorsQuantity = colorsQuantity;
     }
 
+    //Other function
     public boolean twoSquaresHaveTheSameColor(int id1, int id2){
         return squares.get(id1).getColor().equals(squares.get(id2).getColor());
     }
@@ -101,7 +98,6 @@ public class LogicalBoard {
         if(posY > 1) {
             if(twoSquaresHaveTheSameColor(id, topId)) {
                 result.add(topId);
-                System.out.println("top: " + topId);
             }
         }
         //Bottom
@@ -109,7 +105,6 @@ public class LogicalBoard {
         if(posY < height) {
             if (twoSquaresHaveTheSameColor(id, bottomId)){
                 result.add(bottomId);
-                System.out.println("bottom: " + bottomId);
             }
         }
         //Left
@@ -117,7 +112,6 @@ public class LogicalBoard {
         if(posX > 1) {
             if(twoSquaresHaveTheSameColor(id, leftId)){
                 result.add(leftId);
-                System.out.println("left: " + (leftId));
             }
         }
         //Right
@@ -125,10 +119,8 @@ public class LogicalBoard {
         if(posX < width) {
             if(twoSquaresHaveTheSameColor(id, rightId)){
                 result.add(rightId);
-                System.out.println("right: " + rightId);
             }
         }
-        //System.out.println("posX=" + posX + ", posY=" + posY);
         return result;
     }
 
@@ -157,49 +149,77 @@ public class LogicalBoard {
                 }
             }
         }
-
         return result;
     }
 
     // If clicked square has, or more neighbors in the same color,
     // move down squares in the columns first (like a gravitation),
-    // and then move columns from left to right if board have empty column between full.
+    // and then move columns from right to left if board have empty column between full.
     public void mergeBoardAfterRemoveSquares(int id){
         Set<Integer> squaresGroup = findGroupSquaresInTheSameColor(id);
         if((getSquareColor(id) != "BLACK") && (squaresGroup.size() > 1)){
+            List<List<String>> columnColorList = new ArrayList<>();
             squaresGroup.stream().forEach(square -> setSquareColor(square, "BLACK"));
-            //List<List<Integer>> columnIdList = new ArrayList<>();
-            //List<List<String>> columnColorList = new ArrayList<>();
-            //Stack<List<String>> colorListsStack = new Stack<>();
-/*
-            for (int i=0; i<width; i++){
-                List<Integer> columnId = new ArrayList<>();
+
+            for (int i=1; i<=width; i++){
                 List<String> columnColor = new ArrayList<>();
-                for (int j=1; j<=height; j++){
-                    int pos = i*width + j;
+                for (int j=0; j<height; j++){
+                    int pos = j*width + i;
                     String color;
                     if(getSquareColor(pos) != "BLACK"){
-                        columnId.add(pos);
                         color = getSquareColor(pos);
                         columnColor.add(color);
-                        setSquareColor(pos, "BLACK");
                     }
-
                 }
-                columnIdList.add(columnId);
-                colorListsStack.add(columnColor);
+                if(columnColor.size()> 0){
+                    columnColorList.add(columnColor);
+                }
             }
-            int counterId = 1;
-*/
+            setAllSquaresBlack();
+
+            for (int i=0; i<columnColorList.size(); i++) {
+                List<String> columnColor = columnColorList.get(i);
+                int h = height - 1;
+                for (int j = columnColor.size() - 1; j >= 0; j--) {
+                    int iidd = h * width + i + 1;
+                    String color = columnColor.get(j);
+                    setSquareColor(iidd, color);
+                    h--;
+                }
+            }
         }
     }
 
     // Return true, when player don't have any moves (all squares don't have any neighbours in the same colour).
     boolean checkGameIsOver(){
-        boolean isOver = false;
-
-
-
+        boolean isOver = true;
+        List<Integer> idList;
+        for (LogicalSquare s: squares){
+            if(s.getColor() != "BLACK") {
+                idList = findTopBottomLeftAndRightNeighborsInTheSameColor(s.getId());
+                if(idList.size() > 1){
+                    isOver = false;
+                }
+            }
+        }
         return isOver;
+    }
+
+    double calculateFilledPercentage(){
+        double per;
+        long blacks;
+        blacks = squares.stream()
+                .filter(s->s.getColor().equals(SquareColors.BLACK))
+                .count();
+        blacks--;
+        per = width*height;
+        per -= blacks;
+        per /= width*height;
+        per *= 100;
+        per = (int)(per*10);
+        per /= 10;
+        System.out.println(blacks + "   " + per);
+
+        return per;
     }
 }

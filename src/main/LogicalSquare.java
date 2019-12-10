@@ -6,17 +6,9 @@ public class LogicalSquare {
     private int posY;
     private String color;
 
-    enum Color{
-        BLACK,              // -> disabled square
-        WHITE,
-        RED,
-        GREEN,
-        BLUE
-    }
-
     public LogicalSquare(int id) {
         this.id = id;
-        color = "BLACK";
+        color = "BLUE";
     }
 
     public int getId() {
